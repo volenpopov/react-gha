@@ -8,12 +8,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version-file: '.nvmrc'
+      
       - name: Vulnerability assessment of dependencies
         run: npm audit --audit-level=critical
+      
       - name: Cache dependencies
         uses: actions/cache@v3
         id: npm-cache
@@ -22,14 +25,19 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+      
       - name: Install Dependencies       
         run: npm ci --no-audit    
+      
       - name: Lint code
         run: npm run lint
+      
       - name: Run unit tests
         run: npm test
+      
       - name: Build
         run: npm run build
+        
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
