@@ -3,7 +3,7 @@ name: Continuos Integration
 on: [push, workflow_dispatch]
 
 jobs:
-  ci:
+  integration:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
@@ -37,7 +37,7 @@ jobs:
       
       - name: Build
         run: npm run build
-        
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v3
         with:
