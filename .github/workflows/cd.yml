@@ -17,7 +17,7 @@ jobs:
       - name: Download workflow artifact
         uses: dawidd6/action-download-artifact@v2.24.2
         with:
-          github_token: ''
+          github_token: 'test'
           workflow: ci.yml
           name: build
         
