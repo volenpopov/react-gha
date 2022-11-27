@@ -17,8 +17,9 @@ jobs:
       - name: Download workflow artifact
         uses: dawidd6/action-download-artifact@v2.24.2
         with:
+          github_token: ''
           workflow: ci.yml
           name: build
         
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -R build
