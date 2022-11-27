@@ -1,0 +1,23 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Get build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: build
+        
+      - name: Display structure of downloaded files
+        run: ls -R
