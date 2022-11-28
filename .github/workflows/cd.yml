@@ -6,6 +6,13 @@ on:
       - main
   workflow_dispatch:
     
+permissions:
+  id-token: write 
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+
 jobs:
   deploy:
     runs-on: ubuntu-22.04
@@ -18,4 +25,13 @@ jobs:
         with:
           workflow: ci.yml
           name: build
+      
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ROLE_ARN }}
         
+      - name:  Copy index.html to s3
+        run: |
+          aws s3 cp build s3://${{ secrets.BUCKET_NAME }} --recursive --only-show-errors
