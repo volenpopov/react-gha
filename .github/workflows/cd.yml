@@ -33,6 +33,9 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_ARN }}
         
-      - name:  Copy index.html to s3
+      - name: List contents
         run: |
-          aws s3 cp build s3://${{ secrets.BUCKET_NAME }} --recursive --only-show-errors
+          ls
+      # - name:  Copy index.html to s3
+      #   run: |
+      #     aws s3 cp build s3://${{ secrets.BUCKET_NAME }} --recursive --only-show-errors
