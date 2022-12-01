@@ -9,7 +9,6 @@ on:
 permissions:
   actions: read
   contents: read
-  id-token: write 
 
 env:
   AWS_REGION: us-east-1
@@ -17,6 +16,8 @@ env:
 jobs:
   deploy:
     runs-on: ubuntu-22.04
+    permissions:
+      id-token: write
     steps:
       - name: Download workflow artifact
         uses: dawidd6/action-download-artifact@v2.24.2
