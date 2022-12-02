@@ -43,7 +43,7 @@ jobs:
         working-directory: infrastructure/terraform
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_ARN }}
