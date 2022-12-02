@@ -6,9 +6,70 @@ on:
       - main
   workflow_dispatch:
 
+env:
+  AWS_REGION: us-east-1
+
 jobs:
-  integration:
+  paths_filter:
     runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      infrastructure: ${{ steps.filter.outputs.infrastructure }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Setup paths filter
+      uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          infrastructure:
+            - 'infrastructure/terraform/**'
+
+  plan_infrastructure:
+    needs: paths_filter
+    if: ${{ needs.paths_filter.outputs.infrastructure == 'true' }}
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
+      id-token: write
+    defaults:
+      run:
+        working-directory: infrastructure/terraform
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ROLE_ARN }}
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Terraform version
+        id: get_version
+        run: echo "TERRAFORM_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ steps.get_version.outputs.TERRAFORM_VERSION }}
+
+      - name: Initialize Terraform
+        run: terraform init
+
+      - name: Run Terraform plan
+        run: terraform plan
+
+  app_integration:
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
