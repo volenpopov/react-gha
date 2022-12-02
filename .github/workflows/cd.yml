@@ -11,28 +11,7 @@ env:
   TF_EXECUTION_PLAN_FILE_NAME: execution-plan
 
 jobs:
-  paths_filter:
-    runs-on: ubuntu-22.04
-    permissions:
-      actions: read
-      contents: read
-    outputs:
-      infrastructure: ${{ steps.filter.outputs.infrastructure }}
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-    
-    - name: Setup paths filter
-      uses: dorny/paths-filter@v2
-      id: filter
-      with:
-        filters: |
-          infrastructure:
-            - 'infrastructure/terraform/**'
-
   deploy-infrastructure:
-    needs: paths_filter
-    if: ${{ needs.paths_filter.outputs.infrastructure == 'true' }}
     runs-on: ubuntu-22.04
     permissions:
       actions: read
@@ -76,6 +55,7 @@ jobs:
         run: terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
   
   deploy-app:
+    needs: deploy-infrastructure
     runs-on: ubuntu-22.04
     permissions:
       actions: read
