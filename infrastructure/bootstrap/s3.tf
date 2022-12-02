@@ -62,7 +62,8 @@ data "aws_iam_policy_document" "bucket" {
 
       values = [
         "arn:aws:iam::${local.account_id}:root",
-        "arn:aws:iam::${local.account_id}:user/admin"
+        "arn:aws:iam::${local.account_id}:user/admin",
+        "arn:aws:iam::${local.account_id}:role/test-githubactions"
       ]
     }
   }
