@@ -8,6 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  TF_FOLDER_PATH: infrastructure/terraform
   TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
 
 jobs:
@@ -28,19 +29,19 @@ jobs:
       with:
         filters: |
           infrastructure:
-            - 'infrastructure/terraform/**'
+            - '${{ env.TF_FOLDER_PATH }}/**'
 
   ci_infrastructure:
+    runs-on: ubuntu-22.04
     needs: paths_filter
     if: ${{ needs.paths_filter.outputs.infrastructure == 'true' }}
-    runs-on: ubuntu-22.04
     permissions:
       actions: read
       contents: read
       id-token: write
     defaults:
       run:
-        working-directory: infrastructure/terraform
+        working-directory: ${{ env.TF_FOLDER_PATH }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
@@ -54,27 +55,33 @@ jobs:
       - name: Create Terraform plugin cache directory
         run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
 
-      - name: Cache Terraform
+      - name: Cache Terraform plugins
         uses: actions/cache@v3
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/terraform/.terraform.lock.hcl') }}
           restore-keys: ${{ runner.os }}-terraform-
 
       - name: Get Terraform version
-        id: get_version
-        run: echo "TERRAFORM_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
+        id: get_tf_version
+        run: echo "TF_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
-          terraform_version: ${{ steps.get_version.outputs.TERRAFORM_VERSION }}
+          terraform_version: ${{ steps.get_tf_version.outputs.TF_VERSION }}
 
       - name: Initialize Terraform
         run: terraform init
 
-      - name: Run Terraform plan
+      - name: Format
+        run: terraform fmt -check
+
+      - name: Validate
+        run: terraform validate
+      
+      - name: Plan
         run: terraform plan
 
   ci_app:
@@ -89,9 +96,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: .nvmrc
       
-      - name: Cache dependencies
+      - name: Cache npm dependencies
         uses: actions/cache@v3
         with:
           path: ~/.npm
@@ -107,7 +114,7 @@ jobs:
       - name: Lint code
         run: npm run lint
       
-      - name: Run unit tests
+      - name: Unit testing
         run: npm test
       
       - name: Build

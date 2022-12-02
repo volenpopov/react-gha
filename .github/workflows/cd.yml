@@ -6,6 +6,11 @@ on:
       - main
   workflow_dispatch:
     
+permissions:
+  actions: read
+  contents: read
+  id-token: write
+
 env:
   AWS_REGION: us-east-1
   TF_FOLDER_PATH: infrastructure/terraform
@@ -15,12 +20,8 @@ env:
 jobs:
   deploy-infrastructure:
     runs-on: ubuntu-22.04
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     outputs:
-      bucket_name: steps.provision.outputs.BUCKET_NAME
+      bucket_name: ${{ steps.provision.outputs.BUCKET_NAME }}
     defaults:
       run:
         working-directory: ${{ env.TF_FOLDER_PATH }}
@@ -37,7 +38,7 @@ jobs:
       - name: Create Terraform plugin cache directory
         run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
 
-      - name: Cache Terraform
+      - name: Cache Terraform plugins
         uses: actions/cache@v3
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
@@ -45,22 +46,28 @@ jobs:
           restore-keys: ${{ runner.os }}-terraform-
 
       - name: Get Terraform version
-        id: get_version
+        id: get_tf_version
         run: echo "TF_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
-          terraform_version: ${{ steps.get_version.outputs.TF_VERSION }}
+          terraform_version: ${{ steps.get_tf_version.outputs.TF_VERSION }}
 
       - name: Initialize Terraform
         run: terraform init
 
-      - name: Run Terraform plan
+      - name: Format
+        run: terraform fmt -check
+
+      - name: Validate
+        run: terraform validate
+
+      - name: Plan
         run: terraform plan -out=${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
 
-      - name: Upload execution plan artifact
+      - name: Upload plan artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
@@ -75,12 +82,8 @@ jobs:
   deploy-app:
     runs-on: ubuntu-22.04
     needs: deploy-infrastructure
-    permissions:
-      actions: read
-      contents: read
-      id-token: write
     steps:
-      - name: Download workflow artifact
+      - name: Download build artifact
         uses: dawidd6/action-download-artifact@v2.24.2
         with:
           workflow: ci.yml
@@ -92,6 +95,5 @@ jobs:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_ARN }}
         
-      - name:  Sync the build folder with S3
-        run: |
-          aws s3 sync . s3://${{ needs.deploy-infrastructure.outputs.bucket_name }}
+      - name: Sync build with S3
+        run: aws s3 sync . s3://${{ needs.deploy-infrastructure.outputs.bucket_name }}
