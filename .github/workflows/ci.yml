@@ -29,7 +29,7 @@ jobs:
           infrastructure:
             - 'infrastructure/terraform/**'
 
-  plan_infrastructure:
+  ci_infrastructure:
     needs: paths_filter
     if: ${{ needs.paths_filter.outputs.infrastructure == 'true' }}
     runs-on: ubuntu-22.04
@@ -65,7 +65,7 @@ jobs:
       - name: Run Terraform plan
         run: terraform plan
 
-  app_integration:
+  ci_app:
     runs-on: ubuntu-22.04
     permissions:
       actions: read
