@@ -8,6 +8,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
 
 jobs:
   paths_filter:
@@ -50,6 +51,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create Terraform plugin cache directory
+        run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: ${{ runner.os }}-terraform-
+
       - name: Get Terraform version
         id: get_version
         run: echo "TERRAFORM_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
@@ -57,6 +68,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
+          terraform_wrapper: false
           terraform_version: ${{ steps.get_version.outputs.TERRAFORM_VERSION }}
 
       - name: Initialize Terraform
@@ -81,12 +93,10 @@ jobs:
       
       - name: Cache dependencies
         uses: actions/cache@v3
-        id: npm-cache
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+          restore-keys: ${{ runner.os }}-node-
       
       - name: Vulnerability assessment of dependencies
         run: npm audit --audit-level=critical

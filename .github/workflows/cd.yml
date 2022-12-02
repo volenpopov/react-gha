@@ -8,7 +8,9 @@ on:
     
 env:
   AWS_REGION: us-east-1
+  TF_FOLDER_PATH: infrastructure/terraform
   TF_EXECUTION_PLAN_FILE_NAME: execution-plan
+  TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
 
 jobs:
   deploy-infrastructure:
@@ -17,9 +19,11 @@ jobs:
       actions: read
       contents: read
       id-token: write
+    outputs:
+      bucket_name: steps.provision.outputs.BUCKET_NAME
     defaults:
       run:
-        working-directory: infrastructure/terraform
+        working-directory: ${{ env.TF_FOLDER_PATH }}
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -30,14 +34,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Create Terraform plugin cache directory
+        run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Cache Terraform
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: ${{ runner.os }}-terraform-
+
       - name: Get Terraform version
         id: get_version
-        run: echo "TERRAFORM_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
+        run: echo "TF_VERSION=$(cat .terraform.version)" >> $GITHUB_OUTPUT
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: ${{ steps.get_version.outputs.TERRAFORM_VERSION }}
+          terraform_wrapper: false
+          terraform_version: ${{ steps.get_version.outputs.TF_VERSION }}
 
       - name: Initialize Terraform
         run: terraform init
@@ -49,14 +64,17 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
-          path: ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
-
+          path: ${{ env.TF_FOLDER_PATH }}/${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
+          
       - name: Provision the new resources
-        run: terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
+        id: provision
+        run: |
+          terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
+          echo "BUCKET_NAME=$(terraform output bucket_name)" >> $GITHUB_OUTPUT 
   
   deploy-app:
-    needs: deploy-infrastructure
     runs-on: ubuntu-22.04
+    needs: deploy-infrastructure
     permissions:
       actions: read
       contents: read
@@ -76,4 +94,4 @@ jobs:
         
       - name:  Sync the build folder with S3
         run: |
-          aws s3 sync . s3://${{ secrets.BUCKET_NAME }}
+          aws s3 sync . s3://${{ needs.deploy-infrastructure.outputs.bucket_name }}
