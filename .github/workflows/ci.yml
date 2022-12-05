@@ -91,6 +91,8 @@ jobs:
       actions: read
       contents: read
     uses: ./.github/workflows/ci_app.yml
+    with:
+        audit-level: high
     
     
       
