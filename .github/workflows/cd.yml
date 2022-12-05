@@ -21,7 +21,7 @@ jobs:
   deploy-infrastructure:
     runs-on: ubuntu-22.04
     outputs:
-      bucket_name: ${{ steps.apply.outputs.BUCKET_NAME }}
+      bucket_name: ${{ steps.tf_apply.outputs.BUCKET_NAME }}
     defaults:
       run:
         working-directory: ${{ env.TF_FOLDER_PATH }}
@@ -49,6 +49,9 @@ jobs:
           terraform_wrapper: false
           terraform_version: ${{ steps.get_tf_version.outputs.TF_VERSION }}
 
+      - name: Terraform Format
+        run: terraform fmt -check
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
@@ -58,13 +61,10 @@ jobs:
       - name: Initialize Terraform
         run: terraform init
 
-      - name: Format
-        run: terraform fmt -check
-
-      - name: Validate
+      - name: Terraform Validate
         run: terraform validate
 
-      - name: Plan
+      - name: Terraform Plan
         run: terraform plan -out=${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
 
       - name: Upload plan artifact
@@ -73,8 +73,8 @@ jobs:
           name: ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           path: ${{ env.TF_FOLDER_PATH }}/${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           
-      - name: Apply
-        id: apply
+      - name: Terraform Apply
+        id: tf_apply
         run: |
           terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           echo "BUCKET_NAME=$(terraform output bucket_name)" >> $GITHUB_OUTPUT 

@@ -66,6 +66,9 @@ jobs:
           terraform_wrapper: false
           terraform_version: ${{ steps.get_tf_version.outputs.TF_VERSION }}
 
+      - name: Terraform Format
+        run: terraform fmt -check
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
@@ -75,13 +78,10 @@ jobs:
       - name: Initialize Terraform
         run: terraform init
 
-      - name: Format
-        run: terraform fmt -check
-
-      - name: Validate
+      - name: Terraform Validate
         run: terraform validate
       
-      - name: Plan
+      - name: Terraform Plan
         run: terraform plan
 
   ci_app:
