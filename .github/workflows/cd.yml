@@ -21,17 +21,11 @@ jobs:
   deploy-infrastructure:
     runs-on: ubuntu-22.04
     outputs:
-      bucket_name: ${{ steps.provision.outputs.BUCKET_NAME }}
+      bucket_name: ${{ steps.apply.outputs.BUCKET_NAME }}
     defaults:
       run:
         working-directory: ${{ env.TF_FOLDER_PATH }}
     steps:
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-region: ${{ env.AWS_REGION }}
-          role-to-assume: ${{ secrets.ROLE_ARN }}
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -42,7 +36,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ${{ env.TF_PLUGIN_CACHE_DIR }}
-          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/terraform/.terraform.lock.hcl') }}
           restore-keys: ${{ runner.os }}-terraform-
 
       - name: Get Terraform version
@@ -54,6 +48,12 @@ jobs:
         with:
           terraform_wrapper: false
           terraform_version: ${{ steps.get_tf_version.outputs.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ROLE_ARN }}
 
       - name: Initialize Terraform
         run: terraform init
@@ -73,8 +73,8 @@ jobs:
           name: ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           path: ${{ env.TF_FOLDER_PATH }}/${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           
-      - name: Provision the new resources
-        id: provision
+      - name: Apply
+        id: apply
         run: |
           terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           echo "BUCKET_NAME=$(terraform output bucket_name)" >> $GITHUB_OUTPUT 
@@ -83,19 +83,49 @@ jobs:
     runs-on: ubuntu-22.04
     needs: deploy-infrastructure
     steps:
-      - name: Download build artifact
-        uses: dawidd6/action-download-artifact@v2.24.2
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
-          workflow: ci.yml
+          node-version-file: .nvmrc
+      
+      - name: Cache npm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      
+      - name: Vulnerability assessment of dependencies
+        run: npm audit --audit-level=critical
+      
+      - name: Install Dependencies       
+        run: npm ci --no-audit    
+      
+      - name: Lint code
+        run: npm run lint
+      
+      - name: Unit testing
+        run: npm test
+      
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
           name: build
+          path: build
       
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.ROLE_ARN }}
-        
+
       - name: Sync build with S3
         run: |
-          aws s3 sync . s3://${{ needs.deploy-infrastructure.outputs.bucket_name }} --delete --cache-control 'no-cache' --exclude 'static/**/*'
-          aws s3 sync . s3://${{ needs.deploy-infrastructure.outputs.bucket_name }} --cache-control 'max-age=31536000'
+          aws s3 sync build s3://${{ needs.deploy-infrastructure.outputs.bucket_name }} --delete --cache-control 'no-cache' --exclude 'static/**/*'
+          aws s3 sync build s3://${{ needs.deploy-infrastructure.outputs.bucket_name }} --cache-control 'max-age=31536000'
