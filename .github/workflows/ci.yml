@@ -30,7 +30,7 @@ jobs:
         filters: |
           infrastructure:
             - '${{ env.TF_FOLDER_PATH }}/**'
-          app:
+          appp:
             - '!infrastructure/**'
 
   # ci_infrastructure:
