@@ -15,6 +15,7 @@ jobs:
       contents: read
       pull-requests: read
     outputs:
+      app: ${{ steps.filter.outputs.app }}
       infrastructure: ${{ steps.filter.outputs.infrastructure }}
     steps:
     - name: Checkout code
@@ -25,10 +26,10 @@ jobs:
       id: filter
       with:
         filters: |
-          infrastructure:
-            - '${{ env.TF_FOLDER_PATH }}/**'
           app:
             - '!infrastructure/**'
+          infrastructure:
+            - '${{ env.TF_FOLDER_PATH }}/**'
 
   ci_infrastructure:
     runs-on: ubuntu-22.04
