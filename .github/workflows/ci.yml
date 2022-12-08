@@ -31,7 +31,7 @@ jobs:
           infrastructure:
             - '${{ env.TF_FOLDER_PATH }}/**'
 
-  ci_infrastructure:
+  infrastructure:
     runs-on: ubuntu-22.04
     needs: paths_filter
     if: ${{ needs.paths_filter.outputs.infrastructure == 'true' }}
@@ -84,7 +84,7 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-  ci_app:
+  application:
     runs-on: ubuntu-22.04
     needs: paths_filter
     if: ${{ needs.paths_filter.outputs.app == 'true' }}

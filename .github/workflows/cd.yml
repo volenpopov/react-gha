@@ -18,7 +18,7 @@ env:
   TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
 
 jobs:
-  deploy-infrastructure:
+  infrastructure:
     runs-on: ubuntu-22.04
     outputs:
       bucket_name: ${{ steps.tf_apply.outputs.BUCKET_NAME }}
@@ -79,9 +79,9 @@ jobs:
           terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           echo "BUCKET_NAME=$(terraform output bucket_name)" >> $GITHUB_OUTPUT 
   
-  deploy-app:
+  application:
     runs-on: ubuntu-22.04
-    needs: deploy-infrastructure
+    needs: infrastructure
     steps:
       - name: Checkout code
         uses: actions/checkout@v3

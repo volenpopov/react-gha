@@ -1,4 +1,4 @@
-name: PR Title check
+name: PR Title
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  pr_check:
+  validation:
     runs-on: ubuntu-22.04
     steps:
       - uses: amannn/action-semantic-pull-request@v5
