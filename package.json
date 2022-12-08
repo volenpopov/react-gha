@@ -2,6 +2,10 @@
   "name": "spa-gha",
   "version": "0.0.0-semantically-released",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/volenpopov/react-gha.git"
+  },
   "engines": {
     "node": ">=18",
     "npm": ">=8"
@@ -53,5 +57,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "release": {
+    "branches": ["main"]
   }
 }
