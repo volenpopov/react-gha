@@ -8,7 +8,7 @@ on:
     
 permissions:
   actions: read
-  contents: read
+  contents: write
   id-token: write
 
 env:
@@ -18,7 +18,7 @@ env:
   TF_PLUGIN_CACHE_DIR: ${{ github.workspace }}/.terraform.d/plugin-cache
 
 jobs:
-  deploy-infrastructure:
+  infrastructure:
     runs-on: ubuntu-22.04
     outputs:
       bucket_name: ${{ steps.tf_apply.outputs.BUCKET_NAME }}
@@ -79,9 +79,9 @@ jobs:
           terraform apply ${{ env.TF_EXECUTION_PLAN_FILE_NAME }}
           echo "BUCKET_NAME=$(terraform output bucket_name)" >> $GITHUB_OUTPUT 
   
-  deploy-app:
+  application:
     runs-on: ubuntu-22.04
-    needs: deploy-infrastructure
+    needs: infrastructure
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -118,7 +118,12 @@ jobs:
         with:
           name: build
           path: build
-      
+
+      - name: Release
+        uses: cycjimmy/semantic-release-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
