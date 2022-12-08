@@ -137,5 +137,5 @@ jobs:
 
       - name: Sync build with S3
         run: |
-          aws s3 sync build s3://${{ needs.deploy-infrastructure.outputs.bucket_name }} --delete --cache-control 'no-cache' --exclude 'static/**/*'
-          aws s3 sync build s3://${{ needs.deploy-infrastructure.outputs.bucket_name }} --cache-control 'max-age=31536000'
+          aws s3 sync build s3://${{ needs.infrastructure.outputs.bucket_name }} --delete --cache-control 'no-cache' --exclude 'static/**/*'
+          aws s3 sync build s3://${{ needs.infrastructure.outputs.bucket_name }} --cache-control 'max-age=31536000'
