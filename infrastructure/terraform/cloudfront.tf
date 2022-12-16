@@ -15,7 +15,10 @@ resource "aws_cloudfront_distribution" "this" {
 
   default_root_object = "index.html"
 
-  aliases = [local.fqdn]
+  aliases = [
+    local.domain_name,
+    local.www_subdomain
+  ]
 
   origin {
     domain_name              = aws_s3_bucket.this.bucket_regional_domain_name

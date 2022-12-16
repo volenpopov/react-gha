@@ -5,7 +5,6 @@ locals {
 
   s3_origin_id = "s3-react-app"
 
-  domain_name = "volenpopov.click"
-  sub_domain  = "react"
-  fqdn        = "${local.sub_domain}.${local.domain_name}"
+  domain_name   = "volenpopov.click"
+  www_subdomain = "www.${local.domain_name}"
 }

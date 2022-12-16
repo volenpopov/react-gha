@@ -1,7 +1,7 @@
-
 resource "aws_acm_certificate" "this" {
-  domain_name       = local.fqdn
-  validation_method = "DNS"
+  domain_name               = local.domain_name
+  validation_method         = "DNS"
+  subject_alternative_names = ["*.${local.domain_name}"]
 }
 
 resource "aws_acm_certificate_validation" "this" {
