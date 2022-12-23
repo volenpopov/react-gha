@@ -8,22 +8,15 @@ terraform {
     }
   }
 
-  backend "s3" {
-    key = "terraform-s3-backend-infrastructure/terraform.tfstate"
-  }
+  # backend "s3" {
+  #   key = "terraform-s3-backend-infrastructure/terraform.tfstate"
+  # }
 }
 
 provider "aws" {
   region = "us-east-1"
 }
 
-data "aws_caller_identity" "this" {}
-
-locals {
-  account_id          = data.aws_caller_identity.this.account_id
-  bucket_prefix       = "terraform-state-"
-  dynamodb_table_name = "terraform-state"
-}
 
 
 

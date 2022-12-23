@@ -1,9 +1,13 @@
 resource "aws_s3_bucket" "this" {
   bucket_prefix = local.bucket_prefix
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # FYI: the below property facilitates cleanup of resources (e.g. destroying a non-empty versioned bucket)
+  force_destroy = true
+
+  # FYI: ideally in a real world usage scenario you would want to uncomment to below in order to make sure you don't destroy your terraform state backend bucket
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "aws_s3_bucket_policy" "this" {
@@ -37,35 +41,3 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "this" {
     }
   }
 }
-
-data "aws_iam_policy_document" "bucket" {
-  statement {
-    sid = "RestrictPrincipals"
-
-    principals {
-      type        = "*"
-      identifiers = ["*"]
-    }
-
-    effect = "Deny"
-
-    actions = ["s3:*"]
-
-    resources = [
-      aws_s3_bucket.this.arn,
-      "${aws_s3_bucket.this.arn}/*",
-    ]
-
-    condition {
-      test     = "StringNotEquals"
-      variable = "aws:PrincipalArn"
-
-      values = [
-        "arn:aws:iam::${local.account_id}:root",
-        "arn:aws:iam::${local.account_id}:user/admin",
-        "arn:aws:iam::${local.account_id}:role/test-githubactions"
-      ]
-    }
-  }
-}
-
