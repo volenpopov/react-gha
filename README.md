@@ -22,5 +22,13 @@ You should stick with the versions outlined for NodeJS (in the `.nvmrc` file) an
  1) Update all `# TODO:` placeholders with the appropriate values for you
  2) Bootstrap Terraform - this will provision the infrastructure required to store your terraform state remotely and also the IAM role assumed by the Github Actions CICD worker through OIDC ([see here](infrastructure/bootstrap/README.md))
  
+ ### Cleanup
+  - navigate to the `infrastructure/terraform/` folder
+  - `terraform destroy`
+  - navigate to the `infrastructure/bootstrap/` folder
+  - `terraform init -migrate-state`
+    - you will be prompted whether you want to copy the existing state to the new backend, enter `yes`
+  - `terraform destroy`
+ 
 
   
