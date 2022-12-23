@@ -14,18 +14,13 @@ This project includes a sample best practice React app with the following:
 #### Prerequisites
  - an AWS account
  - your own domain (purchased from AWS Route53)
- 
+
+#### NOTE:
+You should stick with the versions outlined for NodeJS (in the `.nvmrc` file) and for Terraform (in the `infrastructure/terraform/.terraform.version` file). You can easily do so by utilzing tools such as `nvm` and `tfswitch`.
+
  #### Steps:
- 1) Update all `# TODO:` placeholders with the appropriate values for yourself
- 2) Bootstrap Terraform - this will provision the infrastructure required to store your terraform state remotely and also the IAM role assumed by the Github Actions CICD worker through OIDC
-  - `cd infrastructure/bootstrap/`
-  - `terraform init`
-  - `terraform apply`
-  - copy the `cicd_role_arn` terraform output value and set it as a secret under the Actions section (with the name of `ROLE_ARN`) in your repository settings
-  - copy the `bucket_name` terraform output value
-  - open the `infrastructure/bootstrap/main.tf` file and uncomment the `backend "s3"` part
-  - re-run `terraform init`
-    - you will be prompted to enter the S3 bucket name, which you copied a couple of steps ago, so you can just paste it now
-    - you will be prompted to enter the region, enter `us-east-1`
-    - you will be prompted whether you want to copy existing state to the new backend, enter `yes`
-  - with the `terraform.tfstate` file successfully migrated to our new S3 backend, you can safely delete the local `terraform.tfstate` and `terraform.tfstate.backup` files 
+ 1) Update all `# TODO:` placeholders with the appropriate values for you
+ 2) Bootstrap Terraform - this will provision the infrastructure required to store your terraform state remotely and also the IAM role assumed by the Github Actions CICD worker through OIDC ([see here](infrastructure/bootstrap/README.md))
+ 
+
+  
