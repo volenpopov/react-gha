@@ -16,7 +16,7 @@ This project includes a sample best practice React app with the following:
  - your own domain (purchased from AWS Route53)
 
 #### NOTE:
-You should stick with the versions outlined for NodeJS (in the `.nvmrc` file) and for Terraform (in the `infrastructure/terraform/.terraform.version` file). You can easily do so by utilzing tools such as `nvm` and `tfswitch`.
+You should stick with the versions outlined for Node (in the `.nvmrc` file) and for Terraform (in the `infrastructure/terraform/.terraform.version` file). You can easily do so by utilzing tools such as [nvm](https://github.com/nvm-sh/nvm) and [tfswitch](https://github.com/warrensbox/terraform-switcher).
 
  #### Steps:
  1) Update all `# TODO:` placeholders with the appropriate values for you
