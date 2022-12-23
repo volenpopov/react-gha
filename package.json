@@ -86,5 +86,6 @@
     "hooks": {
       "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
     }
-  }
+  },
+  "license": "MIT"
 }
