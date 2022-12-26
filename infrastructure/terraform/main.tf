@@ -10,7 +10,7 @@ terraform {
 
   backend "s3" {
     # TODO: after bootstrap completion update the bucket property below with the bucket name from the bootstrap phase
-    bucket = ""
+    bucket = "terraform-state-20221226091321459900000001"
     key    = "react-app/terraform.tfstate"
     region = "us-east-1"
   }
