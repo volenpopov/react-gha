@@ -75,7 +75,8 @@
     [
       "@semantic-release/npm",
       {
-        "npmPublish": false
+        "npmPublish": false,
+        "verifyConditions": false
       }
     ],
     "@semantic-release/github"
