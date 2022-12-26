@@ -69,6 +69,11 @@
       "main"
     ]
   },
+  "plugins": [
+    "@semantic-release/github",
+    "@semantic-release/commit-analyzer",
+    "@semantic-release/release-notes-generator"
+  ],
   "lint-staged": {
     "src/**/*.{js,jsx,ts,tsx}": [
       "npm run lint:fix"
