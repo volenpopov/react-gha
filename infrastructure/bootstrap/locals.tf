@@ -8,7 +8,7 @@ locals {
   dynamodb_table_name = "terraform-state"
 
   # TODO: insert your github username below
-  github_username = "volenpopov"
+  github_username = ""
 
   github_oidc_provider     = "token.actions.githubusercontent.com"
   github_oidc_provider_url = "https://${local.github_oidc_provider}"
@@ -16,5 +16,5 @@ locals {
   oidc_audience = "sts.amazonaws.com"
 
   # TODO: insert your repository name below
-  repo_name = "react-gha"
+  repo_name = ""
 }

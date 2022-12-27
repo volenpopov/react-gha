@@ -6,7 +6,7 @@ locals {
   s3_origin_id = "s3-react-app"
 
   # TODO: insert your domain name below
-  domain_name = "volenpopov.click"
+  domain_name = ""
 
   www_subdomain = "www.${local.domain_name}"
 }
