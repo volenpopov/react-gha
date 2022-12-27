@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-  
+      
 env:
   AWS_REGION: us-east-1
   TF_FOLDER_PATH: infrastructure/terraform
@@ -127,6 +127,8 @@ jobs:
         uses: cycjimmy/semantic-release-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          dry_run: true
             
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
