@@ -5,7 +5,7 @@ This project includes a sample best practice React app with the following:
 - deployed on AWS (with infrastructure provisioned through Terraform)
 - full CI/CD pipeline using GithubActions
 - pre-commit and pre-push hooks
-- automatic release (using the conventional commits specification and semantic versioning)
+- automatic release (using the [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) specification and [semantic versioning](https://semver.org/))
 
 ### Architecture:
 

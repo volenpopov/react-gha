@@ -5,6 +5,14 @@
     "type": "git",
     "url": "https://github.com/volenpopov/react-gha.git"
   },
+  "description": "A sample best practice React app deployed on AWS",
+  "keywords": [
+    "react",
+    "react-ts",
+    "spa",
+    "aws",
+    "react-on-aws"
+  ],
   "private": true,
   "engines": {
     "node": ">=18",
