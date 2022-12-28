@@ -36,6 +36,7 @@ Caching strategy ([see here](https://create-react-app.dev/docs/production-build/
 ### Cleanup
 
 - navigate to the `infrastructure/terraform/` folder
+- `terraform init`
 - `terraform destroy`
 - navigate to the `infrastructure/bootstrap/` folder
 - `terraform init -migrate-state`
