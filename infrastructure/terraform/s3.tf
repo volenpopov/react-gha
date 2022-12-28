@@ -3,11 +3,6 @@ resource "aws_s3_bucket" "this" {
 
   # FYI: the below property facilitates cleanup of resources (e.g. destroying a non-empty versioned bucket)
   force_destroy = true
-
-  # FYI: ideally in a real world usage scenario you would want to uncomment to below in order to make sure you don't destroy the bucket hosting your application
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
 }
 
 resource "aws_s3_bucket_policy" "this" {

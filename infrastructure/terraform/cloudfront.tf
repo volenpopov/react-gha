@@ -10,8 +10,6 @@ resource "aws_cloudfront_distribution" "this" {
   enabled         = true
   is_ipv6_enabled = true
 
-  # wait_for_deployment = false
-
   default_root_object = "index.html"
 
   aliases = [
